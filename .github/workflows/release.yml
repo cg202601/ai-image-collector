@@ -1,0 +1,119 @@
+name: Release extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag, for example v1.9.0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    name: Build, attest, and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG_NAME="${{ inputs.tag }}"
+          fi
+
+          VERSION="${TAG_NAME#v}"
+          MANIFEST_VERSION="$(node -p "require('./manifest.json').version")"
+
+          if [ "${VERSION}" != "${MANIFEST_VERSION}" ]; then
+            echo "Tag version (${VERSION}) does not match manifest version (${MANIFEST_VERSION})." >&2
+            exit 1
+          fi
+
+          echo "tag_name=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "zip_name=ai-image-collector-${TAG_NAME}.zip" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate extension files
+        shell: bash
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('manifest.json', 'utf8')); console.log('manifest.json is valid JSON')"
+          test -f background.js
+          test -f content.js
+          test -f popup.html
+          test -f popup.js
+          test -f popup.css
+          test -f gas_script.js
+          test -d icons
+
+      - name: Check for hardcoded private IDs
+        shell: bash
+        run: |
+          if grep -RInE "SPREADSHEET_ID[[:space:]]*=[[:space:]]*['\"][A-Za-z0-9_-]{20,}|DEFAULT_.*_ID[[:space:]]*=[[:space:]]*['\"][A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|sk-[0-9A-Za-z_-]{20,}" \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            --exclude=README.md \
+            .; then
+            echo "Possible private ID or secret found. Stop release." >&2
+            exit 1
+          fi
+
+      - name: Build release zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          PACKAGE_DIR="dist/ai-image-collector-${{ steps.meta.outputs.tag_name }}"
+          mkdir -p "${PACKAGE_DIR}"
+
+          cp manifest.json "${PACKAGE_DIR}/"
+          cp background.js "${PACKAGE_DIR}/"
+          cp content.js "${PACKAGE_DIR}/"
+          cp popup.html "${PACKAGE_DIR}/"
+          cp popup.css "${PACKAGE_DIR}/"
+          cp popup.js "${PACKAGE_DIR}/"
+          cp gas_script.js "${PACKAGE_DIR}/"
+          cp README.md "${PACKAGE_DIR}/"
+          cp -R icons "${PACKAGE_DIR}/icons"
+
+          cd dist
+          zip -r "${{ steps.meta.outputs.zip_name }}" "ai-image-collector-${{ steps.meta.outputs.tag_name }}"
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/${{ steps.meta.outputs.zip_name }}
+
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          NOTES_FILE="$(mktemp)"
+          cat > "${NOTES_FILE}" <<'EOF'
+          ## AI Image Collector
+
+          This release was built by GitHub Actions from the tagged source code.
+
+          The attached zip is the installable Chrome extension package. Download and unzip it, then load the extracted folder from `chrome://extensions/` with Developer mode enabled.
+
+          Artifact attestation is generated for the zip file so the release package can be verified against this repository and commit.
+          EOF
+
+          gh release create "${{ steps.meta.outputs.tag_name }}" \
+            "dist/${{ steps.meta.outputs.zip_name }}" \
+            --title "AI Image Collector ${{ steps.meta.outputs.tag_name }}" \
+            --notes-file "${NOTES_FILE}" \
+            --verify-tag

@@ -28,12 +28,43 @@ This repository contains the browser extension and the companion Google Apps Scr
 
 ## Install The Extension
 
-1. Download or clone this repository.
+1. Download the latest release zip from GitHub Releases.
+2. Verify the release artifact if your organization requires provenance checks.
+3. Unzip the package.
+4. Open Chrome and go to `chrome://extensions/`.
+5. Turn on `Developer mode`.
+6. Click `Load unpacked`.
+7. Select the extracted extension folder.
+8. Pin the extension if you want quick access from the toolbar.
+
+For development, you can also clone this repository and load the repository folder directly:
+
+1. Clone this repository.
 2. Open Chrome and go to `chrome://extensions/`.
 3. Turn on `Developer mode`.
 4. Click `Load unpacked`.
 5. Select this repository folder.
-6. Pin the extension if you want quick access from the toolbar.
+
+## Trusted Releases
+
+Official release packages are built by GitHub Actions when a version tag such as `v1.9.0` is pushed.
+
+The release workflow:
+
+- validates the extension files;
+- checks for common hardcoded private IDs and secrets;
+- builds the installable zip package;
+- generates an Artifact Attestation with `actions/attest-build-provenance`;
+- uploads the zip to GitHub Releases.
+
+To verify a downloaded release package with GitHub CLI:
+
+```bash
+gh attestation verify ai-image-collector-v1.9.0.zip \
+  --repo cg202601/ai-image-collector
+```
+
+See `docs/release-process.md` for the full release checklist.
 
 ## Create Google Sheets
 
