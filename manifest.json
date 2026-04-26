@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "AI图片收集器",
+  "version": "1.9.0",
+  "description": "快速收集AI生成图片到Google表格，支持右键菜单、剪贴板粘贴、分类管理",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*",
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI图片收集器 - 设置",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "collect-image": {
+      "suggested_key": {
+        "default": "Alt+C"
+      },
+      "description": "打开图片收集面板"
+    }
+  }
+}

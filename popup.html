@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 图片收集器 - 设置</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="header-title">
+        <span class="header-icon">🖼️</span>
+        <span>AI 图片收集器</span>
+      </div>
+      <span class="version">v1.9.0</span>
+    </div>
+
+    <div class="quick-open-wrap">
+      <button class="quick-open-btn" id="openPanelBtn">
+        <span>🪄</span>
+        <span>打开收集面板（替代 Alt+C）</span>
+      </button>
+    </div>
+
+    <div class="section" data-section-key="connection">
+      <div class="section-title">
+        <div class="section-title-main">
+          <span class="section-icon">🔗</span>
+          <span>连接配置</span>
+        </div>
+        <div class="section-actions">
+          <button class="collapse-btn" data-target="sectionConnectionBody" aria-expanded="true">收起</button>
+        </div>
+      </div>
+
+      <div class="section-body" id="sectionConnectionBody">
+        <div class="form-group">
+          <label class="form-label" for="gasUrl">GAS Web App URL</label>
+          <input type="url" class="form-input" id="gasUrl" placeholder="https://script.google.com/macros/s/xxxxx/exec">
+          <div class="form-hint">部署 GAS 脚本后获得的 Web App URL</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="websiteUrl">网站版图库地址</label>
+          <input type="url" class="form-input" id="websiteUrl" placeholder="https://sites.google.com/view/xxxx 或 GAS 展示站地址">
+          <div class="form-hint">填写后，收集面板顶部的快捷入口会打开你的网站版图库</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="sheetId">Google Sheets ID</label>
+          <input type="text" class="form-input" id="sheetId" placeholder="从表格 URL 提取的 ID">
+          <div class="form-hint">表格 URL 中 /d/ 与 /edit 之间的部分</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="driveFolderId">Drive 文件夹 ID</label>
+          <input type="text" class="form-input" id="driveFolderId" placeholder="用于存放图片的 Google Drive 文件夹 ID">
+          <div class="form-hint">Drive 文件夹 URL 中 /folders/ 后面的部分</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="userName">默认人名</label>
+          <input type="text" class="form-input" id="userName" placeholder="你的名字">
+        </div>
+
+        <div class="op-row">
+          <button class="save-btn" id="saveBtn" style="flex: 2;">
+            <span>💾</span>
+            <span>保存设置</span>
+          </button>
+          <button class="test-btn" id="testBtn" style="flex: 2;">
+            <span>🔍</span>
+            <span>测试 GAS 连通</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" data-section-key="software">
+      <div class="section-title">
+        <div class="section-title-main">
+          <span class="section-icon">💻</span>
+          <span>软件列表</span>
+        </div>
+        <div class="section-actions">
+          <button class="add-btn" id="addSoftwareBtn" title="添加软件">+ 添加</button>
+          <button class="collapse-btn" data-target="sectionSoftwareBody" aria-expanded="true">收起</button>
+        </div>
+      </div>
+
+      <div class="section-body" id="sectionSoftwareBody">
+        <div class="tag-list" id="softwareList"></div>
+        <div class="add-row hidden" id="addSoftwareRow">
+          <input type="text" class="form-input add-input" id="newSoftwareInput" placeholder="输入新的软件名称...">
+          <button class="confirm-btn" id="confirmSoftwareBtn">✓</button>
+          <button class="cancel-btn" id="cancelSoftwareBtn">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" data-section-key="category">
+      <div class="section-title">
+        <div class="section-title-main">
+          <span class="section-icon">📁</span>
+          <span>图库分类</span>
+        </div>
+        <div class="section-actions">
+          <button class="add-btn" id="addCategoryBtn" title="添加分类">+ 添加</button>
+          <button class="collapse-btn" data-target="sectionCategoryBody" aria-expanded="true">收起</button>
+        </div>
+      </div>
+
+      <div class="section-body" id="sectionCategoryBody">
+        <div class="tag-list" id="categoryList"></div>
+        <div class="add-row hidden" id="addCategoryRow">
+          <input type="text" class="form-input add-input" id="newCategoryInput" placeholder="输入新的分类名称...">
+          <button class="confirm-btn" id="confirmCategoryBtn">✓</button>
+          <button class="cancel-btn" id="cancelCategoryBtn">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" data-section-key="backup">
+      <div class="section-title">
+        <div class="section-title-main">
+          <span class="section-icon">💾</span>
+          <span>本地 JSON 备份</span>
+        </div>
+        <div class="section-actions">
+          <button class="collapse-btn" data-target="sectionBackupBody" aria-expanded="true">收起</button>
+        </div>
+      </div>
+
+      <div class="section-body" id="sectionBackupBody">
+        <div style="display: flex; gap: 10px;">
+          <button class="submit-btn" id="exportBtn" style="flex: 1; background: rgba(59, 130, 246, 0.4); border: 1px solid #3b82f6; border-radius: 8px; color: #fff; padding: 8px; cursor: pointer;">
+            📤 导出配置
+          </button>
+          <button class="submit-btn" id="importBtn" style="flex: 1; background: rgba(16, 185, 129, 0.4); border: 1px solid #10b981; border-radius: 8px; color: #fff; padding: 8px; cursor: pointer;">
+            📥 导入配置
+          </button>
+          <input type="file" id="importFile" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </div>
+
+    <div class="section" data-section-key="cloud">
+      <div class="section-title">
+        <div class="section-title-main">
+          <span class="section-icon">☁️</span>
+          <span>云端配置漫游</span>
+        </div>
+        <div class="section-actions">
+          <button class="collapse-btn" data-target="sectionCloudBody" aria-expanded="true">收起</button>
+        </div>
+      </div>
+
+      <div class="section-body" id="sectionCloudBody">
+        <div style="font-size: 11px; color: #888; margin-bottom: 10px; line-height: 1.3;">
+          * 需要先在连接配置中填写 GAS Web App URL，才可使用云端漫游。
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="submit-btn" id="uploadCloudBtn" style="flex: 1; background: rgba(168, 85, 247, 0.3); border: 1px solid rgba(168, 85, 247, 0.8); border-radius: 8px; color: #f3e8ff; padding: 8px; cursor: pointer; transition: 0.2s;">
+            📤 本地上云
+          </button>
+          <button class="submit-btn" id="downloadCloudBtn" style="flex: 1; background: rgba(236, 72, 153, 0.3); border: 1px solid rgba(236, 72, 153, 0.8); border-radius: 8px; color: #fce7f3; padding: 8px; cursor: pointer; transition: 0.2s;">
+            📥 云端下载
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <button class="submit-btn" id="listCloudBackupsBtn" style="flex: 1; background: rgba(59, 130, 246, 0.3); border: 1px solid rgba(59, 130, 246, 0.8); border-radius: 8px; color: #dbeafe; padding: 8px; cursor: pointer; transition: 0.2s;">
+        🗂️ 查看备份版本
+      </button>
+    </div>
+
+    <div id="cloudBackupListWrap" class="cloud-backup-list-wrap hidden">
+      <div class="cloud-backup-list-head">选择一个版本一键恢复为当前配置</div>
+      <div id="cloudBackupList" class="cloud-backup-list"></div>
+    </div>
+
+    <div class="status-msg" id="statusMsg"></div>
+
+    <div class="section help-section" data-section-key="help">
+      <div class="section-title">
+        <div class="section-title-main">
+          <span class="section-icon">📖</span>
+          <span>使用方式</span>
+        </div>
+        <div class="section-actions">
+          <button class="collapse-btn" data-target="sectionHelpBody" aria-expanded="true">收起</button>
+        </div>
+      </div>
+
+      <div class="section-body" id="sectionHelpBody">
+        <div class="help-list">
+          <div class="help-item">
+            <span class="help-step">1</span>
+            <span>在任意图片上 <strong>右键 → 收集此 AI 图片</strong></span>
+          </div>
+          <div class="help-item">
+            <span class="help-step">2</span>
+            <span>或按 <kbd>Alt+C</kbd> 打开面板后 <strong>粘贴截图</strong></span>
+          </div>
+          <div class="help-item">
+            <span class="help-step">3</span>
+            <span>填写提示词、选择分类，点击 <strong>发送到表格</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
