@@ -26,6 +26,10 @@ This repository contains the browser extension and the companion Google Apps Scr
 | `gas_script.js` | Google Apps Script backend code |
 | `icons/` | Extension icons |
 
+## User Manual
+
+Chinese user manual: `docs/user-manual.zh-CN.md`
+
 ## Install The Extension
 
 1. Download the latest release zip from GitHub Releases.
